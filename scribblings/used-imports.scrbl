@@ -7,11 +7,16 @@
 @title{Used Imports}
 @author{Laurent Orseau}
 
-This packages defines the two raco commands @verbatim{raco used-imports} and
-@verbatim{raco multi-used-imports}
+This packages defines the two raco commands @tt{raco used-imports} and
+@tt{raco multi-used-imports}
 The API is also described below.
 
+
 @defmodule[used-imports]
+
+Quick start:
+After installing, try on the command line: @verbatim{raco used-imports syntax/parse}
+
 
 @defproc[(module->used-imports [mod module-path?])
          hash?]{
@@ -111,7 +116,9 @@ For a list of modules (in the form of a file path or a module symbol like @racke
  'racket/string
  (list (cons "mod2.rkt" (set 'string-split)) (cons "mod1.rkt" (set 'string-split))))]
  
- The @verbatim{raco multi-used-imports *.rkt} has the same effect, but the result
+ The command
+ @verbatim{raco multi-used-imports *.rkt}
+ has the same effect, but the result
  is displayed in a more readable format.
 }
 
