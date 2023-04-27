@@ -1,7 +1,10 @@
 #lang info
 (define collection "used-imports")
-(define deps '("base"))
-(define build-deps '("scribble-lib" "racket-doc" "rackunit-lib"))
+(define deps '("define2"
+               "drracket-tool-text-lib"
+               "base"))
+(define build-deps '("sandbox-lib"
+                     "scribble-lib" "racket-doc" "rackunit-lib"))
 (define scribblings '(("scribblings/used-imports.scrbl" ())))
 (define pkg-desc "Description Here")
 (define version "0.0")
