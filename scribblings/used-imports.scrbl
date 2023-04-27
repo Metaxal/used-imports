@@ -7,15 +7,16 @@
 @title{Used Imports}
 @author{Laurent Orseau}
 
-This packages defines the two raco commands @tt{raco used-imports} and
-@tt{raco multi-used-imports}
+This packages defines the raco command @tt{raco used-imports} to analyze the provenance
+of identifiers within one or several modules.
 The API is also described below.
 
 
 @defmodule[used-imports]
 
 Quick start:
-After installing, try on the command line: @verbatim{raco used-imports syntax/parse}
+After installing, try on the command line:
+@verbatim{raco used-imports syntax/parse}
 
 
 @defproc[(module->used-imports [mod module-path?])
@@ -117,7 +118,7 @@ For a list of modules (in the form of a file path or a module symbol like @racke
  (list (cons "mod2.rkt" (set 'string-split)) (cons "mod1.rkt" (set 'string-split))))]
  
  The command
- @verbatim{raco multi-used-imports *.rkt}
+ @verbatim{raco used-imports *.rkt}
  has the same effect, but the result
  is displayed in a more readable format.
 }

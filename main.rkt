@@ -89,60 +89,54 @@
   (when verbose? (displayln "Done.\n"))
   top-h)
 
+(define (raco-used-imports mod-str)
+  (define mod
+    (if (file-exists? mod-str)
+      mod-str
+      (resolve-module-path (string->symbol mod-str)))) ; exists with informative error if fails
+  (define h (module->used-imports mod))
+  (define pairs
+    (sort (map (λ (p) (cons (format "~a" (car p)) (cdr p)))
+               (hash->list h))
+          string<=?
+          #:key car))
+  (for ([(req-mod syms) (in-dict pairs)])
+    (displayln req-mod)
+    (define str-syms (sort (map (λ (x) (format "  ~a" x)) (set->list syms)) string<=?))
+    (for-each displayln str-syms)))
+
+(define (raco-multi-used-imports mod-strs)
+  (define mods
+    (for/list ([mod-str (in-list mod-strs)])
+      (if (file-exists? mod-str)
+        mod-str
+        (resolve-module-path (string->symbol mod-str)))))  ; exists with informative error if fails
+  (define h (multi-used-imports mods #:verbose? #t))
+  (define d
+    (sort (map (λ (p) (cons (format "~a" (car p)) (cdr p)))
+               (hash->list h))
+          string<=?
+          #:key car))
+  (for ([(req-mod d2) (in-dict d)])
+    (displayln req-mod)
+    (displayln " is required by:")
+    (define pairs (sort (map (λ (p) (cons (format "~a" (car p)) (cdr p)))
+                             d2)
+                        string<=?
+                        #:key car))
+    (for ([(req-mod syms) (in-dict pairs)])
+      (printf "  ~a\n" req-mod)
+      (define str-syms (sort (map (λ (x) (format "    ~a" x)) (set->list syms)) string<=?))
+      (for-each displayln str-syms))))
+
 (module+ main
   (define args (vector->list (current-command-line-arguments)))
-  (when (empty? args)
-    (eprintf "One argument is required: collection name or module path")
-    (exit -1))
-  (define m (first args))
   (cond
-    [(member m '("-h" "--help"))
-     (displayln "The first argument must be a module path, like \"my-file.rkt\" or \"racket/string\".")
+    [(or (empty? args) (member (first args) '("-h" "--help")))
+     (displayln "Takes a list of files or module names, like \"my-file.rkt\" or \"racket/string\".")
      (displayln "The list of imports used by the module is displayed, grouped by module of origin.")]
+    [(= 1 (length args))
+     (raco-used-imports (first args))]
     [else
-     (define mod
-       (if (file-exists? m)
-         m
-         (resolve-module-path (string->symbol m)))) ; exists with informative error if fails
-     (define h (module->used-imports mod))
-     (define pairs
-       (sort (map (λ (p) (cons (format "~a" (car p)) (cdr p)))
-                  (hash->list h))
-             string<=?
-             #:key car))
-     (for ([(req-mod syms) (in-dict pairs)])
-       (displayln req-mod)
-       (define str-syms (sort (map (λ (x) (format "  ~a" x)) (set->list syms)) string<=?))
-       (for-each displayln str-syms))]))
+     (raco-multi-used-imports args)]))
 
-(module+ multi-used-imports
-  (define args (vector->list (current-command-line-arguments)))
-  (when (empty? args)
-    (eprintf "One argument is required: collection name or module path")
-    (exit -1))
-  (cond
-    [(member (first args) '("-h" "--help"))
-     (displayln "...")]
-    [else
-     (define mods
-       (for/list ([arg (in-list args)])
-         (if (file-exists? arg)
-           arg
-           (resolve-module-path (string->symbol arg)))))  ; exists with informative error if fails
-     (define h (multi-used-imports mods #:verbose? #t))
-     (define d
-       (sort (map (λ (p) (cons (format "~a" (car p)) (cdr p)))
-                  (hash->list h))
-             string<=?
-             #:key car))
-     (for ([(req-mod d2) (in-dict d)])
-       (displayln req-mod)
-       (displayln " is required by:")
-       (define pairs (sort (map (λ (p) (cons (format "~a" (car p)) (cdr p)))
-                                d2)
-                           string<=?
-                           #:key car))
-       (for ([(req-mod syms) (in-dict pairs)])
-         (printf "  ~a\n" req-mod)
-         (define str-syms (sort (map (λ (x) (format "    ~a" x)) (set->list syms)) string<=?))
-         (for-each displayln str-syms)))]))
